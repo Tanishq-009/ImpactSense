@@ -1,6 +1,6 @@
 🌍 Earthquake Impact Predictor
 
-🔗 Live App: Launch ImpactSense App
+🔗 Live App: https://impactsense-zvvchrnc6atp3xihqcuqcp.streamlit.app/
 
 📌 Overview
 
