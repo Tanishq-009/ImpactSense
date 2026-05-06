@@ -19,22 +19,21 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==============================
-# FULL UI FIX + DESIGN
+# UI DESIGN (CLEAN + FIXED INPUT BUG)
 # ==============================
 st.markdown("""
 <style>
 
-/* BACKGROUND */
 html, body, [data-testid="stAppViewContainer"], .stApp {
     background: linear-gradient(135deg, #eef2ff, #e0f7fa, #fce4ec) !important;
 }
 
-/* REMOVE GREY */
-[data-testid="stAppViewContainer"], .block-container {
+.block-container {
     background: transparent !important;
+    padding-top: 2rem;
 }
 
-/* TITLE */
+/* Title */
 .title {
     text-align: center;
     font-size: 42px;
@@ -50,37 +49,24 @@ html, body, [data-testid="stAppViewContainer"], .stApp {
     margin-bottom: 30px;
 }
 
-/* LABELS */
-label {
-    color: #333 !important;
-    font-weight: 600 !important;
-}
-
-/* INPUT FIX (NO GHOST BOX) */
-.stTextInput > div > div > input {
-    background-color: #ffffff !important;
-    color: #000 !important;
-    border: 2px solid #ddd !important;
+/* Inputs FIXED */
+.stTextInput input {
+    background-color: white !important;
+    color: black !important;
+    border: 2px solid #ccc !important;
     border-radius: 12px !important;
     padding: 12px !important;
-    box-shadow: none !important;
     outline: none !important;
-    transition: all 0.2s ease-in-out;
+    box-shadow: none !important;
 }
 
-/* REMOVE INNER LAYER */
-.stTextInput > div {
-    background: transparent !important;
-    border: none !important;
+/* Remove weird focus box */
+.stTextInput input:focus {
+    border: 2px solid #7b2ff7 !important;
+    box-shadow: 0 0 8px rgba(123,47,247,0.3) !important;
 }
 
-/* FOCUS EFFECT */
-.stTextInput > div > div > input:focus {
-    border: 2px solid #ff416c !important;
-    box-shadow: 0 0 6px rgba(255,65,108,0.3) !important;
-}
-
-/* BUTTON */
+/* Button */
 .stButton>button {
     width: 100%;
     border-radius: 14px;
@@ -92,23 +78,16 @@ label {
     border: none;
 }
 
-/* BUTTON HOVER */
-.stButton>button:hover {
-    transform: scale(1.03);
-    box-shadow: 0 6px 20px rgba(255,75,43,0.4);
-}
-
-/* RESULT BOX */
+/* Result box */
 .result {
     margin-top: 25px;
     padding: 20px;
     border-radius: 16px;
     text-align: center;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: bold;
 }
 
-/* COLORS */
 .low { background: #e8f5e9; color: #2e7d32; }
 .medium { background: #fff8e1; color: #ef6c00; }
 .high { background: #ffebee; color: #c62828; }
@@ -117,9 +96,10 @@ label {
 """, unsafe_allow_html=True)
 
 # ==============================
-# LOAD MODEL
+# LOAD MODEL + SCALER
 # ==============================
 model = joblib.load("rf_model.pkl")
+scaler = joblib.load("scaler.pkl")
 
 # ==============================
 # HEADER
@@ -133,16 +113,16 @@ st.markdown('<div class="subtitle">Enter seismic details to predict risk level</
 col1, col2 = st.columns(2)
 
 with col1:
-    magnitude = st.text_input("MAGNITUDE", placeholder="e.g. 6.5")
-    depth = st.text_input("DEPTH (km)", placeholder="e.g. 10")
+    magnitude = st.text_input("Magnitude", placeholder="e.g. 6.5")
+    depth = st.text_input("Depth (km)", placeholder="e.g. 10")
     cdi = st.text_input("CDI", placeholder="e.g. 5.5")
 
 with col2:
     mmi = st.text_input("MMI", placeholder="e.g. 7")
-    sig = st.text_input("SIGNIFICANCE", placeholder="e.g. 500")
+    sig = st.text_input("Significance", placeholder="e.g. 500")
 
 # ==============================
-# PREDICTION
+# PREDICT
 # ==============================
 if st.button("Predict Impact"):
     try:
@@ -152,7 +132,7 @@ if st.button("Predict Impact"):
         mmi = float(mmi)
         sig = float(sig)
 
-        # Feature Engineering
+        # SAME FEATURE ENGINEERING AS TRAINING
         mag_depth_interaction = magnitude * depth
         energy_approx = 10 ** (1.5 * magnitude)
 
@@ -161,38 +141,44 @@ if st.button("Predict Impact"):
             mag_depth_interaction, energy_approx
         ]])
 
-        # Prediction
-        prediction = model.predict(input_data)
-        prob = model.predict_proba(input_data)
+        # ✅ APPLY SCALING (IMPORTANT FIX)
+        input_scaled = scaler.transform(input_data)
+
+        # ✅ PREDICT
+        prediction = model.predict(input_scaled)
+        prob = model.predict_proba(input_scaled)
         confidence = np.max(prob) * 100
 
-        # INTERPRETATION
-        if prediction[0] == 0:
-            risk = "LOW"
-            color_class = "low"
-            advice = "Minimal damage expected. Stay aware but no immediate danger."
-        elif prediction[0] == 1:
-            risk = "MEDIUM"
-            color_class = "medium"
-            advice = "Moderate impact possible. Stay alert and follow safety guidelines."
-        else:
-            risk = "HIGH"
-            color_class = "high"
-            advice = "Severe impact likely. Immediate precautions required."
+        # EXTRA INFO
+        energy_display = f"{energy_approx:.2e}"
+        depth_impact = magnitude / (depth + 1)
 
-        # OUTPUT
-        st.markdown(f"""
-        <div class="result {color_class}">
-            🌍 <b>{risk} RISK</b><br><br>
-            Confidence: {confidence:.2f}%<br>
-            Energy: {energy_approx:.2e}<br>
-            Depth Impact: {mag_depth_interaction:.2f}<br><br>
-            <i>{advice}</i>
-        </div>
-        """, unsafe_allow_html=True)
+        # RESULT OUTPUT
+        if prediction[0] == 0:
+            st.markdown(
+                f'<div class="result low"> LOW RISK ({confidence:.2f}%)<br>'
+                f' Energy: {energy_display}<br>'
+                f' Depth Impact: {depth_impact:.2f}</div>',
+                unsafe_allow_html=True
+            )
+        elif prediction[0] == 1:
+            st.markdown(
+                f'<div class="result medium"> MEDIUM RISK ({confidence:.2f}%)<br>'
+                f' Energy: {energy_display}<br>'
+                f' Depth Impact: {depth_impact:.2f}</div>',
+                unsafe_allow_html=True
+            )
+        else:
+            st.markdown(
+                f'<div class="result high"> HIGH RISK ({confidence:.2f}%)<br>'
+                f'Energy: {energy_display}<br>'
+                f' Depth Impact: {depth_impact:.2f}</div>',
+                unsafe_allow_html=True
+            )
+
+        # DEBUG (remove later)
+        st.write("Prediction:", prediction)
+        st.write("Probabilities:", prob)
 
     except:
-        st.markdown(
-            '<div class="result high">⚠️ Please enter valid numeric values</div>',
-            unsafe_allow_html=True
-        )
+        st.markdown('<div class="result high">⚠️ Enter valid numeric values</div>', unsafe_allow_html=True)
