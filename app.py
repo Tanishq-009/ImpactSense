@@ -12,15 +12,26 @@ st.set_page_config(page_title="Earthquake Predictor", layout="centered")
 # ==============================
 st.markdown("""
 <style>
-[data-testid="stHeader"], [data-testid="stToolbar"], #MainMenu, footer {
-    display: none !important;
+
+/* FORCE FULL BACKGROUND */
+html, body, [data-testid="stAppViewContainer"], .stApp {
+    background: linear-gradient(135deg, #eef2ff, #e0f7fa, #fce4ec) !important;
 }
+
+/* Remove grey overlay */
+[data-testid="stAppViewContainer"] {
+    background: transparent !important;
+}
+
+/* Fix block container */
+.block-container {
+    background: transparent !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
-# ==============================
-# GEN-Z UI CSS
-# ==============================
+
 st.markdown("""
 <style>
 
@@ -55,26 +66,23 @@ label {
     font-size: 14px;
 }
 
-/* ✍️ Inputs */
+st.markdown("""
+<style>
+
 .stTextInput input {
-    background: rgba(255,255,255,0.7) !important;
-    border: 2px solid transparent !important;
+    background-color: white !important;
+    color: black !important;
+    border: 2px solid #ddd !important;
     border-radius: 12px !important;
     padding: 12px !important;
-    transition: all 0.3s ease !important;
-    backdrop-filter: blur(6px);
 }
 
-/* Focus glow */
-.stTextInput input:focus {
-    border: 2px solid #7b2ff7 !important;
-    box-shadow: 0 0 10px rgba(123,47,247,0.4);
-}
-
-/* Placeholder */
 .stTextInput input::placeholder {
     color: #999 !important;
 }
+
+</style>
+""", unsafe_allow_html=True)
 
 /* 🔥 Button */
 .stButton>button {
