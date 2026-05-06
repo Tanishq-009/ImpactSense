@@ -8,7 +8,18 @@ import joblib
 st.set_page_config(page_title="Earthquake Predictor", layout="centered")
 
 # ==============================
-# HIDE STREAMLIT DEFAULT UI
+# HIDE STREAMLIT UI
+# ==============================
+st.markdown("""
+<style>
+[data-testid="stHeader"], [data-testid="stToolbar"], #MainMenu, footer {
+    display: none !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ==============================
+# FIX BACKGROUND + THEME OVERRIDE
 # ==============================
 st.markdown("""
 <style>
@@ -23,25 +34,13 @@ html, body, [data-testid="stAppViewContainer"], .stApp {
     background: transparent !important;
 }
 
-/* Fix block container */
+/* Remove container background */
 .block-container {
     background: transparent !important;
+    padding-top: 2rem;
 }
 
-</style>
-""", unsafe_allow_html=True)
-
-
-st.markdown("""
-<style>
-
-/* 🌈 Background */
-.stApp {
-    background: linear-gradient(135deg, #eef2ff, #e0f7fa, #fce4ec);
-    font-family: 'Poppins', 'Segoe UI', sans-serif;
-}
-
-/* 🧠 Title */
+/* Title */
 .title {
     text-align: center;
     font-size: 42px;
@@ -49,89 +48,81 @@ st.markdown("""
     background: linear-gradient(90deg, #ff4b2b, #ff416c, #7b2ff7);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 5px;
 }
 
 .subtitle {
     text-align: center;
     color: #555;
-    font-size: 16px;
     margin-bottom: 30px;
 }
 
-/* 🏷 Labels */
+/* Labels */
 label {
     color: #333 !important;
     font-weight: 600 !important;
-    font-size: 14px;
 }
 
-st.markdown("""
-<style>
-
+/* Inputs */
 .stTextInput input {
     background-color: white !important;
     color: black !important;
     border: 2px solid #ddd !important;
     border-radius: 12px !important;
     padding: 12px !important;
+    transition: 0.3s;
 }
 
+/* Input focus */
+.stTextInput input:focus {
+    border: 2px solid #7b2ff7 !important;
+    box-shadow: 0 0 10px rgba(123,47,247,0.3);
+}
+
+/* Placeholder */
 .stTextInput input::placeholder {
     color: #999 !important;
 }
 
-</style>
-""", unsafe_allow_html=True)
-
-/* 🔥 Button */
+/* Button */
 .stButton>button {
     width: 100%;
     border-radius: 14px;
     padding: 14px;
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 600;
-    background: linear-gradient(90deg, #ff416c, #ff4b2b);
-    color: white;
+    background: linear-gradient(90deg, #ff416c, #ff4b2b) !important;
+    color: white !important;
     border: none;
-    transition: all 0.3s ease;
 }
 
-/* Button hover */
+/* Hover */
 .stButton>button:hover {
     transform: scale(1.03);
     box-shadow: 0 6px 20px rgba(255,75,43,0.4);
 }
 
-/* 🎯 Result card */
+/* Result box */
 .result {
     margin-top: 25px;
     padding: 20px;
     border-radius: 16px;
     text-align: center;
     font-size: 20px;
-    font-weight: 700;
-    animation: fadeIn 0.5s ease-in-out;
+    font-weight: bold;
 }
 
-/* 🎨 Result colors */
+/* Colors */
 .low {
-    background: linear-gradient(135deg, #a8ff78, #78ffd6);
-    color: #064e3b;
+    background: #e8f5e9;
+    color: #2e7d32;
 }
 .medium {
-    background: linear-gradient(135deg, #ffe259, #ffa751);
-    color: #7c2d12;
+    background: #fff8e1;
+    color: #ef6c00;
 }
 .high {
-    background: linear-gradient(135deg, #ff6a6a, #ff3d3d);
-    color: white;
-}
-
-/* ✨ Animation */
-@keyframes fadeIn {
-    from {opacity: 0; transform: translateY(10px);}
-    to {opacity: 1; transform: translateY(0);}
+    background: #ffebee;
+    color: #c62828;
 }
 
 </style>
@@ -163,9 +154,9 @@ with col2:
     sig = st.text_input("⚡ Significance", placeholder="e.g. 500")
 
 # ==============================
-# PREDICTION
+# PREDICT
 # ==============================
-if st.button("Predict Impact"):
+if st.button("🚀 Predict Impact"):
     try:
         magnitude = float(magnitude)
         depth = float(depth)
@@ -173,7 +164,6 @@ if st.button("Predict Impact"):
         mmi = float(mmi)
         sig = float(sig)
 
-        # Feature engineering
         mag_depth_interaction = magnitude * depth
         energy_approx = 10 ** (1.5 * magnitude)
 
@@ -182,30 +172,16 @@ if st.button("Predict Impact"):
             mag_depth_interaction, energy_approx
         ]])
 
-        # Prediction
         prediction = model.predict(input_data)
         prob = model.predict_proba(input_data)
         confidence = np.max(prob) * 100
 
-        # Output
         if prediction[0] == 0:
-            st.markdown(
-                f'<div class="result low">🟢 LOW RISK<br>{confidence:.2f}% Confidence</div>',
-                unsafe_allow_html=True
-            )
+            st.markdown(f'<div class="result low">🟢 LOW RISK ({confidence:.2f}%)</div>', unsafe_allow_html=True)
         elif prediction[0] == 1:
-            st.markdown(
-                f'<div class="result medium">🟡 MEDIUM RISK<br>{confidence:.2f}% Confidence</div>',
-                unsafe_allow_html=True
-            )
+            st.markdown(f'<div class="result medium">🟡 MEDIUM RISK ({confidence:.2f}%)</div>', unsafe_allow_html=True)
         else:
-            st.markdown(
-                f'<div class="result high">🔴 HIGH RISK<br>{confidence:.2f}% Confidence</div>',
-                unsafe_allow_html=True
-            )
+            st.markdown(f'<div class="result high">🔴 HIGH RISK ({confidence:.2f}%)</div>', unsafe_allow_html=True)
 
     except:
-        st.markdown(
-            '<div class="result high">⚠️ Enter valid numeric values</div>',
-            unsafe_allow_html=True
-        )
+        st.markdown('<div class="result high">⚠️ Enter valid numeric values</div>', unsafe_allow_html=True)
