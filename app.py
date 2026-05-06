@@ -1,3 +1,26 @@
+import streamlit as st
+import numpy as np
+import joblib
+
+# ==============================
+# CONFIG
+# ==============================
+st.set_page_config(page_title="Earthquake Predictor", layout="centered")
+
+# ==============================
+# HIDE STREAMLIT DEFAULT UI
+# ==============================
+st.markdown("""
+<style>
+[data-testid="stHeader"], [data-testid="stToolbar"], #MainMenu, footer {
+    display: none !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ==============================
+# GEN-Z UI CSS
+# ==============================
 st.markdown("""
 <style>
 
@@ -32,7 +55,7 @@ label {
     font-size: 14px;
 }
 
-/* ✍️ Inputs (GenZ style) */
+/* ✍️ Inputs */
 .stTextInput input {
     background: rgba(255,255,255,0.7) !important;
     border: 2px solid transparent !important;
@@ -105,3 +128,76 @@ label {
 
 </style>
 """, unsafe_allow_html=True)
+
+# ==============================
+# LOAD MODEL
+# ==============================
+model = joblib.load("rf_model.pkl")
+
+# ==============================
+# HEADER
+# ==============================
+st.markdown('<div class="title">🌍 Earthquake Impact Predictor</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Enter seismic details to predict risk level</div>', unsafe_allow_html=True)
+
+# ==============================
+# INPUTS
+# ==============================
+col1, col2 = st.columns(2)
+
+with col1:
+    magnitude = st.text_input("📊 Magnitude", placeholder="e.g. 6.5")
+    depth = st.text_input("🌊 Depth (km)", placeholder="e.g. 10")
+    cdi = st.text_input("📍 CDI", placeholder="e.g. 5.5")
+
+with col2:
+    mmi = st.text_input("📶 MMI", placeholder="e.g. 7")
+    sig = st.text_input("⚡ Significance", placeholder="e.g. 500")
+
+# ==============================
+# PREDICTION
+# ==============================
+if st.button("🚀 Predict Impact"):
+    try:
+        magnitude = float(magnitude)
+        depth = float(depth)
+        cdi = float(cdi)
+        mmi = float(mmi)
+        sig = float(sig)
+
+        # Feature engineering
+        mag_depth_interaction = magnitude * depth
+        energy_approx = 10 ** (1.5 * magnitude)
+
+        input_data = np.array([[ 
+            magnitude, depth, cdi, mmi, sig,
+            mag_depth_interaction, energy_approx
+        ]])
+
+        # Prediction
+        prediction = model.predict(input_data)
+        prob = model.predict_proba(input_data)
+        confidence = np.max(prob) * 100
+
+        # Output
+        if prediction[0] == 0:
+            st.markdown(
+                f'<div class="result low">🟢 LOW RISK<br>{confidence:.2f}% Confidence</div>',
+                unsafe_allow_html=True
+            )
+        elif prediction[0] == 1:
+            st.markdown(
+                f'<div class="result medium">🟡 MEDIUM RISK<br>{confidence:.2f}% Confidence</div>',
+                unsafe_allow_html=True
+            )
+        else:
+            st.markdown(
+                f'<div class="result high">🔴 HIGH RISK<br>{confidence:.2f}% Confidence</div>',
+                unsafe_allow_html=True
+            )
+
+    except:
+        st.markdown(
+            '<div class="result high">⚠️ Enter valid numeric values</div>',
+            unsafe_allow_html=True
+        )
