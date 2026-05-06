@@ -2,12 +2,45 @@ import streamlit as st
 import numpy as np
 import joblib
 
+# ==============================
+# PAGE CONFIG
+# ==============================
 st.set_page_config(page_title="Earthquake Impact Predictor", layout="centered")
 
-# ---- LOAD MODEL ----
+# ==============================
+# HIDE STREAMLIT DEFAULT UI
+# ==============================
+st.markdown("""
+<style>
+
+/* Hide header */
+[data-testid="stHeader"] { display: none; }
+
+/* Hide toolbar (Share, GitHub, etc.) */
+[data-testid="stToolbar"] { display: none !important; }
+
+/* Hide hamburger menu */
+#MainMenu { visibility: hidden; }
+
+/* Hide footer */
+footer { visibility: hidden; }
+
+/* Remove top padding */
+.block-container {
+    padding-top: 1rem !important;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# ==============================
+# LOAD MODEL
+# ==============================
 model = joblib.load("rf_model.pkl")
 
-# ---- CSS ----
+# ==============================
+# CUSTOM CSS
+# ==============================
 st.markdown("""
 <style>
 .stApp {
@@ -63,34 +96,39 @@ label {
 </style>
 """, unsafe_allow_html=True)
 
-# ---- Header ----
+# ==============================
+# HEADER
+# ==============================
 st.markdown('<div class="icon">⚡</div>', unsafe_allow_html=True)
 st.markdown('<div class="title">Earthquake Impact Predictor</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">Predict earthquake risk based on seismic parameters</div>', unsafe_allow_html=True)
 
-# ---- Inputs ----
+# ==============================
+# INPUTS
+# ==============================
 magnitude = st.text_input("Magnitude", placeholder="Enter magnitude (e.g., 6.5)")
 depth = st.text_input("Depth (km)", placeholder="Enter depth (e.g., 10)")
 cdi = st.text_input("CDI", placeholder="Enter CDI (e.g., 5.5)")
 mmi = st.text_input("MMI", placeholder="Enter MMI (e.g., 7)")
 sig = st.text_input("Significance (SIG)", placeholder="Enter SIG (e.g., 500)")
 
-# ---- Prediction ----
+# ==============================
+# PREDICTION
+# ==============================
 if st.button("Predict Risk"):
-
     try:
-        # Convert input
+        # Convert inputs
         magnitude = float(magnitude)
         depth = float(depth)
         cdi = float(cdi)
         mmi = float(mmi)
         sig = float(sig)
 
-        # Feature Engineering (IMPORTANT)
+        # Feature Engineering
         mag_depth_interaction = magnitude * depth
         energy_approx = 10 ** (1.5 * magnitude)
 
-        input_data = np.array([[
+        input_data = np.array([[ 
             magnitude,
             depth,
             cdi,
@@ -100,18 +138,30 @@ if st.button("Predict Risk"):
             energy_approx
         ]])
 
-        # Predict
+        # Prediction
         prediction = model.predict(input_data)
         prob = model.predict_proba(input_data)
         confidence = np.max(prob) * 100
 
         # Output
         if prediction[0] == 0:
-            st.markdown(f'<div class="output low">🟢 Low Risk ({confidence:.2f}%)</div>', unsafe_allow_html=True)
+            st.markdown(
+                f'<div class="output low">🟢 Low Risk ({confidence:.2f}%)</div>',
+                unsafe_allow_html=True
+            )
         elif prediction[0] == 1:
-            st.markdown(f'<div class="output medium">🟡 Medium Risk ({confidence:.2f}%)</div>', unsafe_allow_html=True)
+            st.markdown(
+                f'<div class="output medium">🟡 Medium Risk ({confidence:.2f}%)</div>',
+                unsafe_allow_html=True
+            )
         else:
-            st.markdown(f'<div class="output high">🔴 High Risk ({confidence:.2f}%)</div>', unsafe_allow_html=True)
+            st.markdown(
+                f'<div class="output high">🔴 High Risk ({confidence:.2f}%)</div>',
+                unsafe_allow_html=True
+            )
 
     except:
-        st.markdown('<div class="output high">⚠️ Please enter valid numeric values</div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="output high">⚠️ Please enter valid numeric values</div>',
+            unsafe_allow_html=True
+        )
