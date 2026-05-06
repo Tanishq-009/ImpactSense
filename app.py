@@ -19,7 +19,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==============================
-# UI + INPUT FIX
+# UI STYLING
 # ==============================
 st.markdown("""
 <style>
@@ -51,42 +51,32 @@ html, body, [data-testid="stAppViewContainer"], .stApp {
     margin-bottom: 30px;
 }
 
-/* REMOVE wrapper */
+/* Input wrapper remove */
 [data-testid="stTextInput"] {
     background: transparent !important;
     border: none !important;
 }
 
-/* INPUT BOX */
+/* Input box */
 [data-testid="stTextInput"] input {
     background-color: white !important;
     color: black !important;
-
     border: 2px solid #ccc !important;
     border-radius: 4px !important;
-
     padding: 10px !important;
-
     outline: none !important;
     box-shadow: none !important;
 }
 
-/* REMOVE RED BORDER */
+/* Focus */
 [data-testid="stTextInput"] input:focus {
     border: 2px solid #7b2ff7 !important;
-    outline: none !important;
     box-shadow: none !important;
 }
 
-/* Remove invalid red glow */
+/* Remove red invalid */
 input:invalid {
     box-shadow: none !important;
-}
-
-/* Remove inner wrapper */
-[data-testid="stTextInput"] > div {
-    border: none !important;
-    background: transparent !important;
 }
 
 /* Placeholder */
@@ -106,7 +96,7 @@ input:invalid {
     border: none;
 }
 
-/* Result box */
+/* Result */
 .result {
     margin-top: 25px;
     padding: 20px;
@@ -120,11 +110,18 @@ input:invalid {
 .medium { background: #fff8e1; color: #ef6c00; }
 .high { background: #ffebee; color: #c62828; }
 
+/* Safety message */
+.alert {
+    margin-top: 20px;
+    font-size: 14px;
+    text-align: center;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
 # ==============================
-# LOAD MODEL + SCALER
+# LOAD MODEL
 # ==============================
 model = joblib.load("rf_model.pkl")
 scaler = joblib.load("scaler.pkl")
@@ -132,7 +129,7 @@ scaler = joblib.load("scaler.pkl")
 # ==============================
 # HEADER
 # ==============================
-st.markdown('<div class="title">🌍 Earthquake Impact Predictor</div>', unsafe_allow_html=True)
+st.markdown('<div class="title">Earthquake Impact Predictor</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">Enter seismic details to predict risk level</div>', unsafe_allow_html=True)
 
 # ==============================
@@ -141,18 +138,18 @@ st.markdown('<div class="subtitle">Enter seismic details to predict risk level</
 col1, col2 = st.columns(2)
 
 with col1:
-    magnitude = st.text_input("📊 Magnitude", placeholder="e.g. 6.5")
-    depth = st.text_input("🌊 Depth (km)", placeholder="e.g. 10")
-    cdi = st.text_input("📍 CDI", placeholder="e.g. 5.5")
+    magnitude = st.text_input("Magnitude", placeholder="e.g. 6.5")
+    depth = st.text_input("Depth (km)", placeholder="e.g. 10")
+    cdi = st.text_input("CDI", placeholder="e.g. 5.5")
 
 with col2:
-    mmi = st.text_input("📶 MMI", placeholder="e.g. 7")
-    sig = st.text_input("⚡ Significance", placeholder="e.g. 500")
+    mmi = st.text_input("MMI", placeholder="e.g. 7")
+    sig = st.text_input("Significance", placeholder="e.g. 500")
 
 # ==============================
-# PREDICT
+# PREDICTION
 # ==============================
-if st.button("🚀 Predict Impact"):
+if st.button("Predict Impact"):
     try:
         magnitude = float(magnitude)
         depth = float(depth)
@@ -169,63 +166,58 @@ if st.button("🚀 Predict Impact"):
             mag_depth_interaction, energy_approx
         ]])
 
-        # APPLY SCALING
+        # Scaling
         input_scaled = scaler.transform(input_data)
 
-        # PREDICT
+        # Prediction
         prediction = model.predict(input_scaled)
         prob = model.predict_proba(input_scaled)
         confidence = np.max(prob) * 100
 
-        # Energy display
         energy_display = f"{energy_approx:.2e}"
 
-        # OUTPUT
+        # Output
         if prediction[0] == 0:
             st.markdown(
-                f'<div class="result low">🟢 LOW RISK ({confidence:.2f}%)<br>'
-                f'⚡ Energy: {energy_display}</div>',
+                f'<div class="result low">LOW RISK ({confidence:.2f}%)<br>'
+                f'Energy: {energy_display}</div>',
                 unsafe_allow_html=True
             )
+
+            st.markdown("""
+            <div class="alert" style="color:#2e7d32;">
+            Situation is stable. Stay aware of surroundings.<br>
+            Keep basic emergency supplies ready.
+            </div>
+            """, unsafe_allow_html=True)
+
         elif prediction[0] == 1:
             st.markdown(
-                f'<div class="result medium">🟡 MEDIUM RISK ({confidence:.2f}%)<br>'
-                f'⚡ Energy: {energy_display}</div>',
+                f'<div class="result medium">MEDIUM RISK ({confidence:.2f}%)<br>'
+                f'Energy: {energy_display}</div>',
                 unsafe_allow_html=True
             )
+
+            st.markdown("""
+            <div class="alert" style="color:#ef6c00;">
+            Moderate risk detected. Stay alert.<br>
+            Be prepared to move to a safer location.
+            </div>
+            """, unsafe_allow_html=True)
+
         else:
             st.markdown(
-                f'<div class="result high">🔴 HIGH RISK ({confidence:.2f}%)<br>'
-                f'⚡ Energy: {energy_display}</div>',
+                f'<div class="result high">HIGH RISK ({confidence:.2f}%)<br>'
+                f'Energy: {energy_display}</div>',
                 unsafe_allow_html=True
             )
 
+            st.markdown("""
+            <div class="alert" style="color:#c62828;">
+            High risk detected. Take immediate precautions.<br>
+            Move to an open and safe area away from structures.
+            </div>
+            """, unsafe_allow_html=True)
+
     except:
-        st.markdown('<div class="result high">⚠️ Enter valid numeric values</div>', unsafe_allow_html=True)
-
-# ==============================
-# DYNAMIC SAFETY MESSAGE
-# ==============================
-if prediction[0] == 0:
-    st.markdown("""
-    <div style="text-align:center; margin-top:25px; font-size:14px; color:#2e7d32;">
-    🟢 Situation is stable — stay aware but no immediate danger.<br>
-    📦 Keep basic emergency supplies ready just in case.
-    </div>
-    """, unsafe_allow_html=True)
-
-elif prediction[0] == 1:
-    st.markdown("""
-    <div style="text-align:center; margin-top:25px; font-size:14px; color:#ef6c00;">
-    🟡 Moderate risk detected — stay alert and avoid risky areas.<br>
-    🚪 Be ready to evacuate and follow official updates.
-    </div>
-    """, unsafe_allow_html=True)
-
-else:
-    st.markdown("""
-    <div style="text-align:center; margin-top:25px; font-size:14px; color:#c62828;">
-    🔴 High risk — take immediate safety precautions.<br>
-    🛑 Move to an open area and stay away from buildings.
-    </div>
-    """, unsafe_allow_html=True)
+        st.markdown('<div class="result high">Enter valid numeric values</div>', unsafe_allow_html=True)
