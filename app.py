@@ -116,7 +116,7 @@ st.markdown('<div class="subtitle">Enter seismic details to predict risk level</
 # ==============================
 # INPUT CARD
 # ==============================
-st.markdown('<div class="card">', unsafe_allow_html=True)
+
 
 col1, col2 = st.columns(2)
 
@@ -129,7 +129,7 @@ with col2:
     mmi = st.text_input("MMI", placeholder="e.g. 7")
     sig = st.text_input("Significance", placeholder="e.g. 500")
 
-st.markdown('</div>', unsafe_allow_html=True)
+
 
 # ==============================
 # PREDICTION
