@@ -161,10 +161,10 @@ col1, col2 = st.columns(2)
 with col1:
     magnitude = st.text_input("Magnitude", placeholder="e.g. 6.5")
     depth = st.text_input("Depth (km)", placeholder="e.g. 10")
-    cdi = st.text_input("CDI", placeholder="e.g. 5.5")
+    cdi = st.text_input("CDI Community Decimal Intensit)", placeholder="e.g. 5.5")
 
 with col2:
-    mmi = st.text_input("MMI", placeholder="e.g. 7")
+    mmi = st.text_input("MMI Modified Mercalli Intensity", placeholder="e.g. 7")
     sig = st.text_input("Significance", placeholder="e.g. 500")
 
 # ==============================
