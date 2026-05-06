@@ -8,7 +8,7 @@ import joblib
 st.set_page_config(page_title="Earthquake Predictor", layout="centered")
 
 # ==============================
-# HIDE STREAMLIT UI
+# HIDE STREAMLIT DEFAULT UI
 # ==============================
 st.markdown("""
 <style>
@@ -45,13 +45,22 @@ html, body, [data-testid="stAppViewContainer"], .stApp {
     -webkit-text-fill-color: transparent;
 }
 
+/* Subtitle */
 .subtitle {
     text-align: center;
-    color: #555;
+    color: #333;
     margin-bottom: 30px;
+    font-size: 16px;
 }
 
-/* Input wrapper remove */
+/* FIX LABEL VISIBILITY */
+label {
+    color: #1a237e !important;
+    font-weight: 700 !important;
+    font-size: 15px !important;
+}
+
+/* Remove wrapper */
 [data-testid="stTextInput"] {
     background: transparent !important;
     border: none !important;
@@ -59,22 +68,23 @@ html, body, [data-testid="stAppViewContainer"], .stApp {
 
 /* Input box */
 [data-testid="stTextInput"] input {
-    background-color: white !important;
-    color: black !important;
-    border: 2px solid #ccc !important;
-    border-radius: 4px !important;
+    background-color: #ffffff !important;
+    color: #000 !important;
+    border: 2px solid #ddd !important;
+    border-radius: 8px !important;
     padding: 10px !important;
     outline: none !important;
     box-shadow: none !important;
+    transition: 0.3s;
 }
 
-/* Focus */
+/* Focus effect */
 [data-testid="stTextInput"] input:focus {
-    border: 2px solid #7b2ff7 !important;
-    box-shadow: none !important;
+    border: 2px solid #ff416c !important;
+    box-shadow: 0 0 8px rgba(255,65,108,0.3);
 }
 
-/* Remove red invalid */
+/* Remove red invalid border */
 input:invalid {
     box-shadow: none !important;
 }
@@ -82,6 +92,11 @@ input:invalid {
 /* Placeholder */
 [data-testid="stTextInput"] input::placeholder {
     color: #888 !important;
+}
+
+/* Spacing */
+[data-testid="stTextInput"] {
+    margin-bottom: 15px;
 }
 
 /* Button */
@@ -94,6 +109,12 @@ input:invalid {
     background: linear-gradient(90deg, #ff416c, #ff4b2b);
     color: white;
     border: none;
+    transition: 0.3s;
+}
+
+.stButton>button:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 15px rgba(255,65,108,0.3);
 }
 
 /* Result */
@@ -110,9 +131,9 @@ input:invalid {
 .medium { background: #fff8e1; color: #ef6c00; }
 .high { background: #ffebee; color: #c62828; }
 
-/* Safety message */
+/* Alert */
 .alert {
-    margin-top: 20px;
+    margin-top: 15px;
     font-size: 14px;
     text-align: center;
 }
@@ -166,30 +187,29 @@ if st.button("Predict Impact"):
             mag_depth_interaction, energy_approx
         ]])
 
-        # Scaling
+        # Scale input
         input_scaled = scaler.transform(input_data)
 
-        # Prediction
+        # Predict
         prediction = model.predict(input_scaled)
         prob = model.predict_proba(input_scaled)
         confidence = np.max(prob) * 100
 
         energy_display = f"{energy_approx:.2e}"
 
-        # Output
+        # Output + Alert
         if prediction[0] == 0:
             st.markdown(
                 f'<div class="result low">LOW RISK ({confidence:.2f}%)<br>'
                 f'Energy: {energy_display}</div>',
                 unsafe_allow_html=True
             )
-
-            st.markdown("""
-            <div class="alert" style="color:#2e7d32;">
-            Situation is stable. Stay aware of surroundings.<br>
-            Keep basic emergency supplies ready.
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown(
+                '<div class="alert" style="color:#2e7d32;">'
+                'Situation is stable. Stay aware of surroundings.<br>'
+                'Keep basic emergency supplies ready.'
+                '</div>', unsafe_allow_html=True
+            )
 
         elif prediction[0] == 1:
             st.markdown(
@@ -197,13 +217,12 @@ if st.button("Predict Impact"):
                 f'Energy: {energy_display}</div>',
                 unsafe_allow_html=True
             )
-
-            st.markdown("""
-            <div class="alert" style="color:#ef6c00;">
-            Moderate risk detected. Stay alert.<br>
-            Be prepared to move to a safer location.
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown(
+                '<div class="alert" style="color:#ef6c00;">'
+                'Moderate risk detected. Stay alert.<br>'
+                'Be prepared to move to a safer location.'
+                '</div>', unsafe_allow_html=True
+            )
 
         else:
             st.markdown(
@@ -211,13 +230,12 @@ if st.button("Predict Impact"):
                 f'Energy: {energy_display}</div>',
                 unsafe_allow_html=True
             )
-
-            st.markdown("""
-            <div class="alert" style="color:#c62828;">
-            High risk detected. Take immediate precautions.<br>
-            Move to an open and safe area away from structures.
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown(
+                '<div class="alert" style="color:#c62828;">'
+                'High risk detected. Take immediate precautions.<br>'
+                'Move to an open and safe area away from structures.'
+                '</div>', unsafe_allow_html=True
+            )
 
     except:
         st.markdown('<div class="result high">Enter valid numeric values</div>', unsafe_allow_html=True)
