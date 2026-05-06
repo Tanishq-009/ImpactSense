@@ -157,7 +157,7 @@ with col2:
 # ==============================
 # PREDICTION
 # ==============================
-if st.button("🚀 Predict Impact"):
+if st.button("Predict Impact"):
     try:
         magnitude = float(magnitude)
         depth = float(depth)
