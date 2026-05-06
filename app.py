@@ -19,7 +19,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==============================
-# FULL UI + INPUT FIX
+# UI + INPUT FIX
 # ==============================
 st.markdown("""
 <style>
@@ -51,16 +51,16 @@ html, body, [data-testid="stAppViewContainer"], .stApp {
     margin-bottom: 30px;
 }
 
-/* REMOVE wrapper border */
+/* REMOVE wrapper */
 [data-testid="stTextInput"] {
     background: transparent !important;
     border: none !important;
 }
 
-/* RECTANGULAR INPUT */
+/* INPUT BOX */
 [data-testid="stTextInput"] input {
-    background-color: #ffffff !important;
-    color: #000 !important;
+    background-color: white !important;
+    color: black !important;
 
     border: 2px solid #ccc !important;
     border-radius: 4px !important;
@@ -71,16 +71,22 @@ html, body, [data-testid="stAppViewContainer"], .stApp {
     box-shadow: none !important;
 }
 
-/* Remove inner container */
+/* REMOVE RED BORDER */
+[data-testid="stTextInput"] input:focus {
+    border: 2px solid #7b2ff7 !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove invalid red glow */
+input:invalid {
+    box-shadow: none !important;
+}
+
+/* Remove inner wrapper */
 [data-testid="stTextInput"] > div {
     border: none !important;
     background: transparent !important;
-}
-
-/* Focus */
-[data-testid="stTextInput"] input:focus {
-    border: 2px solid #ff416c !important;
-    box-shadow: none !important;
 }
 
 /* Placeholder */
@@ -126,7 +132,7 @@ scaler = joblib.load("scaler.pkl")
 # ==============================
 # HEADER
 # ==============================
-st.markdown('<div class="title">Earthquake Impact Predictor</div>', unsafe_allow_html=True)
+st.markdown('<div class="title">🌍 Earthquake Impact Predictor</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">Enter seismic details to predict risk level</div>', unsafe_allow_html=True)
 
 # ==============================
@@ -135,18 +141,18 @@ st.markdown('<div class="subtitle">Enter seismic details to predict risk level</
 col1, col2 = st.columns(2)
 
 with col1:
-    magnitude = st.text_input("Magnitude", placeholder="e.g. 6.5")
-    depth = st.text_input(" Depth (km)", placeholder="e.g. 10")
-    cdi = st.text_input(" CDI", placeholder="e.g. 5.5")
+    magnitude = st.text_input("📊 Magnitude", placeholder="e.g. 6.5")
+    depth = st.text_input("🌊 Depth (km)", placeholder="e.g. 10")
+    cdi = st.text_input("📍 CDI", placeholder="e.g. 5.5")
 
 with col2:
-    mmi = st.text_input(" MMI", placeholder="e.g. 7")
-    sig = st.text_input(" Significance", placeholder="e.g. 500")
+    mmi = st.text_input("📶 MMI", placeholder="e.g. 7")
+    sig = st.text_input("⚡ Significance", placeholder="e.g. 500")
 
 # ==============================
 # PREDICT
 # ==============================
-if st.button("Predict Impact"):
+if st.button("🚀 Predict Impact"):
     try:
         magnitude = float(magnitude)
         depth = float(depth)
@@ -166,35 +172,31 @@ if st.button("Predict Impact"):
         # APPLY SCALING
         input_scaled = scaler.transform(input_data)
 
-        # PREDICTION
+        # PREDICT
         prediction = model.predict(input_scaled)
         prob = model.predict_proba(input_scaled)
         confidence = np.max(prob) * 100
 
-        # Extra Info
+        # Energy display
         energy_display = f"{energy_approx:.2e}"
-        depth_impact = magnitude / (depth + 1)
 
         # OUTPUT
         if prediction[0] == 0:
             st.markdown(
-                f'<div class="result low">🟢 LOW RISK )<br>'
-                f' Energy: {energy_display}<br>'
-                f' Depth Impact: {depth_impact:.2f}</div>',
+                f'<div class="result low">🟢 LOW RISK ({confidence:.2f}%)<br>'
+                f'⚡ Energy: {energy_display}</div>',
                 unsafe_allow_html=True
             )
         elif prediction[0] == 1:
             st.markdown(
-                f'<div class="result medium">🟡 MEDIUM RISK )<br>'
-                f' Energy: {energy_display}<br>'
-                f' Depth Impact: {depth_impact:.2f}</div>',
+                f'<div class="result medium">🟡 MEDIUM RISK ({confidence:.2f}%)<br>'
+                f'⚡ Energy: {energy_display}</div>',
                 unsafe_allow_html=True
             )
         else:
             st.markdown(
-                f'<div class="result high">🔴 HIGH RISK )<br>'
-                f' Energy: {energy_display}<br>'
-                f' Depth Impact: {depth_impact:.2f}</div>',
+                f'<div class="result high">🔴 HIGH RISK ({confidence:.2f}%)<br>'
+                f'⚡ Energy: {energy_display}</div>',
                 unsafe_allow_html=True
             )
 
