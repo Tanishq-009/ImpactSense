@@ -3,32 +3,80 @@ import numpy as np
 import joblib
 
 # ==============================
-# PAGE CONFIG
+# CONFIG
 # ==============================
-st.set_page_config(page_title="Earthquake Impact Predictor", layout="centered")
+st.set_page_config(page_title="Earthquake Predictor", layout="centered")
 
 # ==============================
-# HIDE STREAMLIT DEFAULT UI
+# HIDE STREAMLIT UI
+# ==============================
+st.markdown("""
+<style>
+[data-testid="stHeader"], [data-testid="stToolbar"], #MainMenu, footer {
+    display: none !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ==============================
+# CUSTOM CSS (GLASS UI)
 # ==============================
 st.markdown("""
 <style>
 
-/* Hide header */
-[data-testid="stHeader"] { display: none; }
-
-/* Hide toolbar (Share, GitHub, etc.) */
-[data-testid="stToolbar"] { display: none !important; }
-
-/* Hide hamburger menu */
-#MainMenu { visibility: hidden; }
-
-/* Hide footer */
-footer { visibility: hidden; }
-
-/* Remove top padding */
-.block-container {
-    padding-top: 1rem !important;
+.stApp {
+    background: linear-gradient(135deg, #141e30, #243b55);
+    font-family: 'Segoe UI', sans-serif;
 }
+
+.card {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 25px;
+    border-radius: 20px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    margin-bottom: 20px;
+}
+
+.title {
+    text-align: center;
+    font-size: 40px;
+    font-weight: bold;
+    color: white;
+}
+
+.subtitle {
+    text-align: center;
+    color: #ccc;
+    margin-bottom: 30px;
+}
+
+.stSlider > div {
+    color: white;
+}
+
+.stButton>button {
+    width: 100%;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 16px;
+    background: linear-gradient(90deg, #ff416c, #ff4b2b);
+    color: white;
+    border: none;
+}
+
+.result {
+    text-align: center;
+    padding: 20px;
+    border-radius: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 20px;
+}
+
+.low { background: rgba(0,255,150,0.2); color: #00ffae; }
+.medium { background: rgba(255,200,0,0.2); color: #ffd700; }
+.high { background: rgba(255,0,0,0.2); color: #ff4c4c; }
 
 </style>
 """, unsafe_allow_html=True)
@@ -39,129 +87,58 @@ footer { visibility: hidden; }
 model = joblib.load("rf_model.pkl")
 
 # ==============================
-# CUSTOM CSS
-# ==============================
-st.markdown("""
-<style>
-.stApp {
-    background: linear-gradient(135deg, #5f0a87, #1a1a2e);
-}
-.block-container {
-    max-width: 700px;
-}
-.title {
-    text-align: center;
-    color: white;
-    font-size: 36px;
-    font-weight: 700;
-}
-.subtitle {
-    text-align: center;
-    color: #ddd;
-    margin-bottom: 30px;
-}
-label {
-    color: white !important;
-    font-weight: 600 !important;
-}
-.stTextInput input {
-    background-color: #2b2f38 !important;
-    color: white !important;
-    border-radius: 10px !important;
-    border: 1px solid #666 !important;
-    padding: 10px !important;
-}
-.stButton>button {
-    border-radius: 12px;
-    padding: 10px 20px;
-    color: white;
-    background: linear-gradient(90deg, #8a2be2, #4169e1);
-    border: none;
-}
-.icon {
-    text-align: center;
-    font-size: 32px;
-    margin-top: 20px;
-}
-.output {
-    margin-top: 20px;
-    padding: 15px;
-    border-radius: 12px;
-    text-align: center;
-    font-weight: 600;
-}
-.low { background: #d1fae5; color: #065f46; }
-.medium { background: #fef3c7; color: #92400e; }
-.high { background: #fee2e2; color: #991b1b; }
-</style>
-""", unsafe_allow_html=True)
-
-# ==============================
 # HEADER
 # ==============================
-st.markdown('<div class="icon">⚡</div>', unsafe_allow_html=True)
-st.markdown('<div class="title">Earthquake Impact Predictor</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Predict earthquake risk based on seismic parameters</div>', unsafe_allow_html=True)
+st.markdown('<div class="title">🌍 Earthquake Impact Predictor</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">AI-powered seismic risk analysis</div>', unsafe_allow_html=True)
 
 # ==============================
-# INPUTS
+# INPUT CARD
 # ==============================
-magnitude = st.text_input("Magnitude", placeholder="Enter magnitude (e.g., 6.5)")
-depth = st.text_input("Depth (km)", placeholder="Enter depth (e.g., 10)")
-cdi = st.text_input("CDI", placeholder="Enter CDI (e.g., 5.5)")
-mmi = st.text_input("MMI", placeholder="Enter MMI (e.g., 7)")
-sig = st.text_input("Significance (SIG)", placeholder="Enter SIG (e.g., 500)")
+st.markdown('<div class="card">', unsafe_allow_html=True)
+
+col1, col2 = st.columns(2)
+
+with col1:
+    magnitude = st.slider("Magnitude", 0.0, 10.0, 5.5)
+    depth = st.slider("Depth (km)", 0, 700, 50)
+
+with col2:
+    cdi = st.slider("CDI", 0.0, 10.0, 5.0)
+    mmi = st.slider("MMI", 0.0, 10.0, 6.0)
+    sig = st.slider("Significance", 0, 1000, 500)
+
+st.markdown('</div>', unsafe_allow_html=True)
 
 # ==============================
-# PREDICTION
+# PREDICT BUTTON
 # ==============================
-if st.button("Predict Risk"):
-    try:
-        # Convert inputs
-        magnitude = float(magnitude)
-        depth = float(depth)
-        cdi = float(cdi)
-        mmi = float(mmi)
-        sig = float(sig)
+if st.button("🚀 Predict Impact"):
 
-        # Feature Engineering
-        mag_depth_interaction = magnitude * depth
-        energy_approx = 10 ** (1.5 * magnitude)
+    # Feature engineering
+    mag_depth_interaction = magnitude * depth
+    energy_approx = 10 ** (1.5 * magnitude)
 
-        input_data = np.array([[ 
-            magnitude,
-            depth,
-            cdi,
-            mmi,
-            sig,
-            mag_depth_interaction,
-            energy_approx
-        ]])
+    input_data = np.array([[ 
+        magnitude, depth, cdi, mmi, sig,
+        mag_depth_interaction, energy_approx
+    ]])
 
-        # Prediction
-        prediction = model.predict(input_data)
-        prob = model.predict_proba(input_data)
-        confidence = np.max(prob) * 100
+    prediction = model.predict(input_data)
+    prob = model.predict_proba(input_data)
+    confidence = np.max(prob) * 100
 
-        # Output
-        if prediction[0] == 0:
-            st.markdown(
-                f'<div class="output low">🟢 Low Risk ({confidence:.2f}%)</div>',
-                unsafe_allow_html=True
-            )
-        elif prediction[0] == 1:
-            st.markdown(
-                f'<div class="output medium">🟡 Medium Risk ({confidence:.2f}%)</div>',
-                unsafe_allow_html=True
-            )
-        else:
-            st.markdown(
-                f'<div class="output high">🔴 High Risk ({confidence:.2f}%)</div>',
-                unsafe_allow_html=True
-            )
+    # ==============================
+    # RESULT CARD
+    # ==============================
+    if prediction[0] == 0:
+        st.markdown(f'<div class="result low">🟢 LOW RISK<br>{confidence:.2f}% Confidence</div>', unsafe_allow_html=True)
+    elif prediction[0] == 1:
+        st.markdown(f'<div class="result medium">🟡 MEDIUM RISK<br>{confidence:.2f}% Confidence</div>', unsafe_allow_html=True)
+    else:
+        st.markdown(f'<div class="result high">🔴 HIGH RISK<br>{confidence:.2f}% Confidence</div>', unsafe_allow_html=True)
 
-    except:
-        st.markdown(
-            '<div class="output high">⚠️ Please enter valid numeric values</div>',
-            unsafe_allow_html=True
-        )
+    # ==============================
+    # CONFIDENCE BAR
+    # ==============================
+    st.progress(int(confidence))
