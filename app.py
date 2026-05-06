@@ -133,13 +133,13 @@ st.markdown('<div class="subtitle">Enter seismic details to predict risk level</
 col1, col2 = st.columns(2)
 
 with col1:
-    magnitude = st.text_input("📊 Magnitude", placeholder="e.g. 6.5")
-    depth = st.text_input("🌊 Depth (km)", placeholder="e.g. 10")
-    cdi = st.text_input("📍 CDI", placeholder="e.g. 5.5")
+    magnitude = st.text_input("MAGNITUDE", placeholder="e.g. 6.5")
+    depth = st.text_input("DEPTH (km)", placeholder="e.g. 10")
+    cdi = st.text_input("CDI", placeholder="e.g. 5.5")
 
 with col2:
-    mmi = st.text_input("📶 MMI", placeholder="e.g. 7")
-    sig = st.text_input("⚡ Significance", placeholder="e.g. 500")
+    mmi = st.text_input("MMI", placeholder="e.g. 7")
+    sig = st.text_input("SIGNIFICANCE", placeholder="e.g. 500")
 
 # ==============================
 # PREDICTION
@@ -184,10 +184,10 @@ if st.button("🚀 Predict Impact"):
         st.markdown(f"""
         <div class="result {color_class}">
             🌍 <b>{risk} RISK</b><br><br>
-            📊 Confidence: {confidence:.2f}%<br>
-            ⚡ Energy: {energy_approx:.2e}<br>
-            📌 Depth Impact: {mag_depth_interaction:.2f}<br><br>
-            🧠 <i>{advice}</i>
+            Confidence: {confidence:.2f}%<br>
+            Energy: {energy_approx:.2e}<br>
+            Depth Impact: {mag_depth_interaction:.2f}<br><br>
+            <i>{advice}</i>
         </div>
         """, unsafe_allow_html=True)
 
