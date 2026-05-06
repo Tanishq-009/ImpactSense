@@ -178,21 +178,21 @@ if st.button("Predict Impact"):
         # OUTPUT
         if prediction[0] == 0:
             st.markdown(
-                f'<div class="result low">🟢 LOW RISK ({confidence:.2f}%)<br>'
+                f'<div class="result low">🟢 LOW RISK )<br>'
                 f' Energy: {energy_display}<br>'
                 f' Depth Impact: {depth_impact:.2f}</div>',
                 unsafe_allow_html=True
             )
         elif prediction[0] == 1:
             st.markdown(
-                f'<div class="result medium">🟡 MEDIUM RISK ({confidence:.2f}%)<br>'
+                f'<div class="result medium">🟡 MEDIUM RISK )<br>'
                 f' Energy: {energy_display}<br>'
                 f' Depth Impact: {depth_impact:.2f}</div>',
                 unsafe_allow_html=True
             )
         else:
             st.markdown(
-                f'<div class="result high">🔴 HIGH RISK ({confidence:.2f}%)<br>'
+                f'<div class="result high">🔴 HIGH RISK )<br>'
                 f' Energy: {energy_display}<br>'
                 f' Depth Impact: {depth_impact:.2f}</div>',
                 unsafe_allow_html=True
