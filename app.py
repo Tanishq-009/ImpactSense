@@ -202,3 +202,30 @@ if st.button("🚀 Predict Impact"):
 
     except:
         st.markdown('<div class="result high">⚠️ Enter valid numeric values</div>', unsafe_allow_html=True)
+
+# ==============================
+# DYNAMIC SAFETY MESSAGE
+# ==============================
+if prediction[0] == 0:
+    st.markdown("""
+    <div style="text-align:center; margin-top:25px; font-size:14px; color:#2e7d32;">
+    🟢 Situation is stable — stay aware but no immediate danger.<br>
+    📦 Keep basic emergency supplies ready just in case.
+    </div>
+    """, unsafe_allow_html=True)
+
+elif prediction[0] == 1:
+    st.markdown("""
+    <div style="text-align:center; margin-top:25px; font-size:14px; color:#ef6c00;">
+    🟡 Moderate risk detected — stay alert and avoid risky areas.<br>
+    🚪 Be ready to evacuate and follow official updates.
+    </div>
+    """, unsafe_allow_html=True)
+
+else:
+    st.markdown("""
+    <div style="text-align:center; margin-top:25px; font-size:14px; color:#c62828;">
+    🔴 High risk — take immediate safety precautions.<br>
+    🛑 Move to an open area and stay away from buildings.
+    </div>
+    """, unsafe_allow_html=True)
