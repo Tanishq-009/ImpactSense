@@ -19,28 +19,22 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==============================
-# FIX BACKGROUND + THEME OVERRIDE
+# FULL UI FIX + DESIGN
 # ==============================
 st.markdown("""
 <style>
 
-/* FORCE FULL BACKGROUND */
+/* BACKGROUND */
 html, body, [data-testid="stAppViewContainer"], .stApp {
     background: linear-gradient(135deg, #eef2ff, #e0f7fa, #fce4ec) !important;
 }
 
-/* Remove grey overlay */
-[data-testid="stAppViewContainer"] {
+/* REMOVE GREY */
+[data-testid="stAppViewContainer"], .block-container {
     background: transparent !important;
 }
 
-/* Remove container background */
-.block-container {
-    background: transparent !important;
-    padding-top: 2rem;
-}
-
-/* Title */
+/* TITLE */
 .title {
     text-align: center;
     font-size: 42px;
@@ -56,34 +50,37 @@ html, body, [data-testid="stAppViewContainer"], .stApp {
     margin-bottom: 30px;
 }
 
-/* Labels */
+/* LABELS */
 label {
     color: #333 !important;
     font-weight: 600 !important;
 }
 
-/* Inputs */
-.stTextInput input {
-    background-color: white !important;
-    color: black !important;
+/* INPUT FIX (NO GHOST BOX) */
+.stTextInput > div > div > input {
+    background-color: #ffffff !important;
+    color: #000 !important;
     border: 2px solid #ddd !important;
     border-radius: 12px !important;
     padding: 12px !important;
-    transition: 0.3s;
+    box-shadow: none !important;
+    outline: none !important;
+    transition: all 0.2s ease-in-out;
 }
 
-/* Input focus */
-.stTextInput input:focus {
-    border: 2px solid #7b2ff7 !important;
-    box-shadow: 0 0 10px rgba(123,47,247,0.3);
+/* REMOVE INNER LAYER */
+.stTextInput > div {
+    background: transparent !important;
+    border: none !important;
 }
 
-/* Placeholder */
-.stTextInput input::placeholder {
-    color: #999 !important;
+/* FOCUS EFFECT */
+.stTextInput > div > div > input:focus {
+    border: 2px solid #ff416c !important;
+    box-shadow: 0 0 6px rgba(255,65,108,0.3) !important;
 }
 
-/* Button */
+/* BUTTON */
 .stButton>button {
     width: 100%;
     border-radius: 14px;
@@ -95,35 +92,26 @@ label {
     border: none;
 }
 
-/* Hover */
+/* BUTTON HOVER */
 .stButton>button:hover {
     transform: scale(1.03);
     box-shadow: 0 6px 20px rgba(255,75,43,0.4);
 }
 
-/* Result box */
+/* RESULT BOX */
 .result {
     margin-top: 25px;
     padding: 20px;
     border-radius: 16px;
     text-align: center;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: bold;
 }
 
-/* Colors */
-.low {
-    background: #e8f5e9;
-    color: #2e7d32;
-}
-.medium {
-    background: #fff8e1;
-    color: #ef6c00;
-}
-.high {
-    background: #ffebee;
-    color: #c62828;
-}
+/* COLORS */
+.low { background: #e8f5e9; color: #2e7d32; }
+.medium { background: #fff8e1; color: #ef6c00; }
+.high { background: #ffebee; color: #c62828; }
 
 </style>
 """, unsafe_allow_html=True)
@@ -154,7 +142,7 @@ with col2:
     sig = st.text_input("⚡ Significance", placeholder="e.g. 500")
 
 # ==============================
-# PREDICT
+# PREDICTION
 # ==============================
 if st.button("🚀 Predict Impact"):
     try:
@@ -164,6 +152,7 @@ if st.button("🚀 Predict Impact"):
         mmi = float(mmi)
         sig = float(sig)
 
+        # Feature Engineering
         mag_depth_interaction = magnitude * depth
         energy_approx = 10 ** (1.5 * magnitude)
 
@@ -172,16 +161,38 @@ if st.button("🚀 Predict Impact"):
             mag_depth_interaction, energy_approx
         ]])
 
+        # Prediction
         prediction = model.predict(input_data)
         prob = model.predict_proba(input_data)
         confidence = np.max(prob) * 100
 
+        # INTERPRETATION
         if prediction[0] == 0:
-            st.markdown(f'<div class="result low">🟢 LOW RISK ({confidence:.2f}%)</div>', unsafe_allow_html=True)
+            risk = "LOW"
+            color_class = "low"
+            advice = "Minimal damage expected. Stay aware but no immediate danger."
         elif prediction[0] == 1:
-            st.markdown(f'<div class="result medium">🟡 MEDIUM RISK ({confidence:.2f}%)</div>', unsafe_allow_html=True)
+            risk = "MEDIUM"
+            color_class = "medium"
+            advice = "Moderate impact possible. Stay alert and follow safety guidelines."
         else:
-            st.markdown(f'<div class="result high">🔴 HIGH RISK ({confidence:.2f}%)</div>', unsafe_allow_html=True)
+            risk = "HIGH"
+            color_class = "high"
+            advice = "Severe impact likely. Immediate precautions required."
+
+        # OUTPUT
+        st.markdown(f"""
+        <div class="result {color_class}">
+            🌍 <b>{risk} RISK</b><br><br>
+            📊 Confidence: {confidence:.2f}%<br>
+            ⚡ Energy: {energy_approx:.2e}<br>
+            📌 Depth Impact: {mag_depth_interaction:.2f}<br><br>
+            🧠 <i>{advice}</i>
+        </div>
+        """, unsafe_allow_html=True)
 
     except:
-        st.markdown('<div class="result high">⚠️ Enter valid numeric values</div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="result high">⚠️ Please enter valid numeric values</div>',
+            unsafe_allow_html=True
+        )
