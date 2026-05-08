@@ -2,14 +2,10 @@ import streamlit as st
 import numpy as np
 import joblib
 
-# ==============================
-# CONFIG
-# ==============================
+
 st.set_page_config(page_title="Earthquake Predictor", layout="centered")
 
-# ==============================
-# HIDE STREAMLIT DEFAULT UI
-# ==============================
+
 st.markdown("""
 <style>
 [data-testid="stHeader"], [data-testid="stToolbar"], #MainMenu, footer {
@@ -18,9 +14,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ==============================
-# UI STYLING
-# ==============================
+
 st.markdown("""
 <style>
 
@@ -141,21 +135,15 @@ input:invalid {
 </style>
 """, unsafe_allow_html=True)
 
-# ==============================
-# LOAD MODEL
-# ==============================
+
 model = joblib.load("rf_model.pkl")
 scaler = joblib.load("scaler.pkl")
 
-# ==============================
-# HEADER
-# ==============================
+
 st.markdown('<div class="title">Earthquake Impact Predictor</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">Enter seismic details to predict risk level</div>', unsafe_allow_html=True)
 
-# ==============================
-# INPUTS
-# ==============================
+
 col1, col2 = st.columns(2)
 
 with col1:
@@ -167,9 +155,7 @@ with col2:
     mmi = st.text_input("MMI [Modified Mercalli Intensity]", placeholder="e.g. 7")
     sig = st.text_input("Significance", placeholder="e.g. 500")
 
-# ==============================
-# PREDICTION
-# ==============================
+
 if st.button("Predict Impact"):
     try:
         magnitude = float(magnitude)
@@ -197,7 +183,6 @@ if st.button("Predict Impact"):
 
         energy_display = f"{energy_approx:.2e}"
 
-        # Output + Alert
         if prediction[0] == 0:
             st.markdown(
                 f'<div class="result low">LOW RISK ({confidence:.2f}%)<br>'
